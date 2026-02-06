@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Wordle-Unlock</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inknut+Antiqua:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF1F2;
+            --card-bg: #FFFFFF;
+            --primary-red: #9F1239; /* Deep Rose */
+            --text-main: #374151;
+            --success: #65A30D; /* Olive */
+            --partial: #D97706; /* Amber */
+            --absent: #9CA3AF; /* Gray */
+            --border-width: 3px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background: var(--card-bg);
+            border: var(--border-width) solid var(--primary-red);
+            box-shadow: 10px 10px 0px rgba(159, 18, 57, 0.1); 
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .container::after {
+            content: '♥';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: var(--bg-color);
+            text-shadow: 0 0 0 var(--primary-red);
+            opacity: 0.3;
+        }
+
+        h1 { font-size: 2.2rem; font-weight: 900; color: var(--primary-red); margin-bottom: 8px; letter-spacing: -0.5px; line-height: 1.1; }
+        h2 { font-size: 1.8rem; font-weight: 700; color: var(--primary-red); margin-bottom: 20px; }
+        .subtitle { font-size: 1.1rem; color: #6b7280; margin-bottom: 40px; font-style: italic; font-weight: 400; }
+
+        /* --- Input & Select Styling --- */
+        .input-group { margin-bottom: 30px; text-align: left; position: relative; }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-red);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            border: none;
+            border-bottom: 2px solid #e5e7eb;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.3s;
+            border-radius: 0;
+            cursor: pointer;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239F1239%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0px center;
+            background-size: 12px;
+            padding-right: 20px;
+        }
+
+        input[type="text"]:focus, select:focus { border-bottom-color: var(--primary-red); }
+
+        /* --- Message Preview Box --- */
+        #previewBox {
+            background: #FFF1F2;
+            padding: 15px;
+            border-left: 4px solid var(--primary-red);
+            margin-top: -15px;
+            margin-bottom: 30px;
+            font-family: 'Inknut Antiqua', serif;
+            font-size: 0.9rem;
+            color: var(--primary-red);
+            line-height: 1.5;
+            display: none;
+        }
+
+        /* --- Buttons --- */
+        button {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 16px 45px;
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(159, 18, 57, 0.2);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(159, 18, 57, 0.3); background: #881337; }
+        
+        .hidden { display: none !important; }
+
+        /* --- Clue Box --- */
+        .clue-box {
+            background-color: #FFF1F2;
+            border: 1px solid var(--primary-red);
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .clue-text { color: var(--primary-red); font-weight: 700; font-size: 1rem; }
+
+        /* --- Game Grid --- */
+        .grid { display: grid; grid-template-rows: repeat(5, auto); gap: 10px; margin-bottom: 30px; justify-content: center; }
+        .row { display: grid; grid-template-columns: repeat(4, 55px); gap: 10px; }
+        .tile {
+            width: 55px; height: 55px; border: 2px solid #e5e7eb;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: 700; color: var(--text-main);
+            text-transform: uppercase; background: white; border-radius: 8px;
+            transition: all 0.4s ease;
+        }
+        .tile.filled { border-color: var(--text-main); animation: pop 0.1s ease-in-out; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .tile.correct { background: var(--success); color: white; border-color: var(--success); }
+        .tile.present { background: var(--partial); color: white; border-color: var(--partial); }
+        .tile.absent { background: var(--absent); color: white; border-color: var(--absent); }
+
+        /* --- Keyboard --- */
+        .keyboard { max-width: 100%; margin: 0 auto; }
+        .keyboard-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; }
+        .key {
+            font-family: 'Playfair Display', serif; font-size: 0.85rem; font-weight: 700;
+            padding: 0; height: 50px; width: 35px; display: flex; align-items: center; justify-content: center;
+            background: white; border: 1px solid #e5e7eb; border-bottom-width: 3px;
+            color: var(--text-main); cursor: pointer; text-transform: uppercase;
+            border-radius: 6px; transition: transform 0.1s;
+        }
+        .key:active { transform: translateY(2px); border-bottom-width: 1px; }
+        .key.wide { width: 55px; font-size: 0.75rem; }
+        .key.correct { background: var(--success); color: white; border-color: var(--success); }
+        .key.present { background: var(--partial); color: white; border-color: var(--partial); }
+        .key.absent { background: var(--absent); color: white; border-color: var(--absent); }
+
+        /* --- Message Reveal --- */
+        #messageReveal { animation: fadeIn 1s ease-in; }
+        .message-display {
+            margin-top: 30px; padding: 40px 20px; background: var(--bg-color);
+            border: 2px dashed var(--primary-red); border-radius: 12px; position: relative;
+        }
+        .message-text { font-family: 'Inknut Antiqua', serif; font-size: 1.4rem; line-height: 1.6; color: var(--primary-red); font-weight: 700; }
+        .message-from { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-style: italic; color: #6b7280; margin-top: 20px; }
+        .celebration { font-size: 1.1rem; color: var(--success); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .hint { font-size: 0.9rem; color: var(--primary-red); margin-top: 25px; font-style: italic; opacity: 0.8; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Secondary Button (Send One Back) */
+        #sendBackBtn {
+            background-color: transparent;
+            color: var(--primary-red);
+            border: 2px solid var(--primary-red);
+            margin-top: 30px;
+        }
+        #sendBackBtn:hover {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        /* --- Background Animation --- */
+        .heart-bg {
+            position: fixed; bottom: -10vh; background-color: var(--primary-red);
+            width: 20px; height: 20px; transform: rotate(45deg);
+            opacity: 0.2; z-index: -1; animation: floatUp linear forwards; pointer-events: none;
+        }
+        .heart-bg::before, .heart-bg::after {
+            content: ""; width: 20px; height: 20px; background-color: inherit;
+            border-radius: 50%; position: absolute;
+        }
+        .heart-bg::before { top: -10px; left: 0; }
+        .heart-bg::after { top: 0; left: -10px; }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(45deg) scale(0.8); opacity: 0; }
+            10% { opacity: 0.3; }
+            100% { transform: translateY(-120vh) rotate(45deg) scale(1); opacity: 0; }
+        }
+
+        @media (max-width: 450px) {
+            .container { padding: 40px 20px; border-width: 2px; }
+            h1 { font-size: 1.8rem; }
+            .row { grid-template-columns: repeat(4, 45px); gap: 6px; }
+            .tile { width: 45px; height: 45px; font-size: 1.4rem; }
+            .key { width: 28px; height: 45px; font-size: 0.75rem; }
+            .key.wide { width: 45px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="creatorMode">
+            <h1>Valentine's Unlock</h1>
+            <p class="subtitle">Create a secret message they have to win to read.</p>
+            
+            <div class="input-group">
+                <label for="senderName">From (Your Name)</label>
+                <input type="text" id="senderName" placeholder="e.g. Romeo">
+            </div>
+
+            <div class="input-group">
+                <label for="recipientName">To (Their Name)</label>
+                <input type="text" id="recipientName" placeholder="e.g. Juliet">
+            </div>
+
+            <div class="input-group">
+                <label for="messageSelect">Select Your Secret Message</label>
+                <select id="messageSelect">
+                    <option value="" disabled selected>-- Choose a Message --</option>
+                </select>
+            </div>
+            
+            <div id="previewBox"></div>
+
+            <button id="createBtn">Create Challenge</button>
+
+            <div id="linkOutput" class="hidden" style="margin-top: 40px;">
+                <div class="input-group">
+                    <label for="shareLink">Copy & Send This Link</label>
+                    <input type="text" id="shareLink" readonly>
+                </div>
+                <button id="copyBtn" style="background-color: #374151;">Copy Link</button>
+            </div>
+        </div>
+
+        <div id="recipientMode" class="hidden">
+            <h2 id="lockedTitle">Locked Message</h2>
+            
+            <div id="clueContainer" class="clue-box">
+                <p class="clue-text" id="clueDisplay"></p>
+            </div>
+
+            <div id="gameBoard" class="game-board">
+                <div class="grid" id="grid"></div>
+                <div class="keyboard" id="keyboard">
+                    <div class="keyboard-row">
+                        <div class="key" data-key="Q">Q</div><div class="key" data-key="W">W</div><div class="key" data-key="E">E</div><div class="key" data-key="R">R</div><div class="key" data-key="T">T</div><div class="key" data-key="Y">Y</div><div class="key" data-key="U">U</div><div class="key" data-key="I">I</div><div class="key" data-key="O">O</div><div class="key" data-key="P">P</div>
+                    </div>
+                    <div class="keyboard-row">
+                        <div class="key" data-key="A">A</div><div class="key" data-key="S">S</div><div class="key" data-key="D">D</div><div class="key" data-key="F">F</div><div class="key" data-key="G">G</div><div class="key" data-key="H">H</div><div class="key" data-key="J">J</div><div class="key" data-key="K">K</div><div class="key" data-key="L">L</div>
+                    </div>
+                    <div class="keyboard-row">
+                        <div class="key wide" data-key="ENTER">Ent</div><div class="key" data-key="Z">Z</div><div class="key" data-key="X">X</div><div class="key" data-key="C">C</div><div class="key" data-key="V">V</div><div class="key" data-key="B">B</div><div class="key" data-key="N">N</div><div class="key" data-key="M">M</div><div class="key wide" data-key="BACKSPACE">Del</div>
+                    </div>
+                </div>
+                <p class="hint" id="hintText"></p>
+            </div>
+
+            <div id="messageReveal" class="hidden">
+                <p class="celebration" id="celebrationText"></p>
+                <div class="message-display">
+                    <p class="message-text" id="revealedMessage"></p>
+                    <p class="message-from" id="messageFrom"></p>
+                </div>
+                
+                <button id="sendBackBtn">Create Your Own</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loveMessages = [
+            "You make my heart skip a beat every single day. I love you more than words can express.",
+            "From the moment I met you, I knew my life would never be the same. You are my everything.",
+            "Every day with you is a gift. Thank you for being mine.",
+            "You are the reason I believe in love. Happy Valentine's Day, my darling.",
+            "I fall in love with you all over again, every single day.",
+            "You are my today and all of my tomorrows. I love you endlessly.",
+            "In a sea of people, my eyes will always search for you.",
+            "You are my favorite notification, my favorite hello, and my hardest goodbye.",
+            "Loving you is the easiest thing I've ever done. You are my home.",
+            "You are the poetry I never knew how to write, and the song I never knew how to sing.",
+            "My love for you is a journey that starts at forever and ends at never.",
+            "You are my sun, my moon, and all of my stars. I adore you.",
+            "With you, I am home. With you, I am whole. I love you completely.",
+            "You are the best thing that ever happened to me. Thank you for choosing me.",
+            "I love you not only for what you are, but for what I am when I am with you.",
+            "You are my greatest adventure and my safest place. I love you.",
+            "Every love story is beautiful, but ours is my favorite.",
+            "You are the missing piece I never knew I needed. I love you more each day.",
+            "Being with you is like coming home to a place I never knew I was missing.",
+            "You make the ordinary extraordinary. I love you beyond measure.",
+            "My heart is and always will be yours. Happy Valentine's Day, my love."
+        ];
+
+        const validWords = [
+            { word: "LOVE", clue: "Intense feeling of deep affection" },
+            { word: "KISS", clue: "A touch with the lips" },
+            { word: "HUGS", clue: "An embrace with arms" },
+            { word: "DATE", clue: "A romantic social meeting" },
+            { word: "ROSE", clue: "A flower symbolizing romance" },
+            { word: "BABY", clue: "A sweet nickname for a lover" },
+            { word: "MINE", clue: "Belonging to me" },
+            { word: "DEAR", clue: "Used to address someone you love" },
+            { word: "OURS", clue: "Belonging to us" },
+            { word: "SOUL", clue: "Spiritual part of a person" },
+            { word: "TRUE", clue: "Real and genuine" },
+            { word: "FIRE", clue: "Burning passion" },
+            { word: "HOPE", clue: "A feeling of expectation" },
+            { word: "WISH", clue: "A strong desire" },
+            { word: "FOND", clue: "Having an affection for" }
+        ];
+
+        let gameState = {
+            targetWord: '', targetClue: '', currentRow: 0, currentGuess: '',
+            guesses: [], keyboardState: {}, senderName: '', recipientName: '', messageId: 0, gameOver: false
+        };
+
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+
+            // --- 1. Populate Dropdown with Hover Logic ---
+            const select = document.getElementById('messageSelect');
+            const previewBox = document.getElementById('previewBox');
+
+            if (select) {
+                loveMessages.forEach((msg, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = msg.length > 50 ? msg.substring(0, 50) + "..." : msg;
+                    option.title = msg; 
+                    select.appendChild(option);
+                });
+
+                select.addEventListener('change', (e) => {
+                    const selectedIdx = e.target.value;
+                    if (selectedIdx !== "") {
+                        previewBox.style.display = 'block';
+                        previewBox.textContent = `"${loveMessages[selectedIdx]}"`;
+                    }
+                });
+            }
+
+            // Listener for the "Create Your Own" button
+            const sendBackBtn = document.getElementById('sendBackBtn');
+            if(sendBackBtn) {
+                sendBackBtn.addEventListener('click', () => {
+                    window.location.href = window.location.pathname; 
+                });
+            }
+
+            if (encodedData) {
+                try {
+                    const decoded = JSON.parse(atob(encodedData));
+                    gameState.senderName = decoded.sender;
+                    gameState.recipientName = decoded.recipient;
+                    gameState.targetWord = decoded.word;
+                    gameState.targetClue = decoded.clue || "A romantic word";
+                    gameState.messageId = decoded.msgId;
+                    
+                    document.getElementById('creatorMode').classList.add('hidden');
+                    document.getElementById('recipientMode').classList.remove('hidden');
+                    document.getElementById('lockedTitle').textContent = `Locked Message from ${gameState.senderName}`;
+                    document.getElementById('clueDisplay').textContent = `CLUE: ${gameState.targetClue}`;
+                    initGame();
+                } catch (e) { alert('Invalid link. Please check and try again.'); }
+            } else {
+                document.getElementById('createBtn').addEventListener('click', createValentine);
+                document.getElementById('copyBtn').addEventListener('click', copyLink);
+            }
+        }
+
+        function startFloatingHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-bg');
+                heart.style.left = Math.random() * 100 + 'vw';
+                const duration = Math.random() * 6 + 6; 
+                heart.style.animationDuration = duration + 's';
+                const size = Math.random() * 1 + 0.5;
+                heart.style.transform = `scale(${size}) rotate(45deg)`;
+                if (Math.random() > 0.7) { heart.style.backgroundColor = '#D97706'; }
+                document.body.appendChild(heart);
+                setTimeout(() => { heart.remove(); }, duration * 1000);
+            }, 500);
+        }
+
+        function createValentine() {
+            const sender = document.getElementById('senderName').value.trim();
+            const recipient = document.getElementById('recipientName').value.trim();
+            const selectedMsgId = document.getElementById('messageSelect').value;
+
+            if (!sender || !recipient || selectedMsgId === "") {
+                alert('Please fill in all names and select a message!');
+                return;
+            }
+
+            const randomObj = validWords[Math.floor(Math.random() * validWords.length)];
+            const data = {
+                sender: sender, recipient: recipient,
+                word: randomObj.word, clue: randomObj.clue,
+                msgId: parseInt(selectedMsgId)
+            };
+            const encoded = btoa(JSON.stringify(data));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+            document.getElementById('shareLink').value = shareUrl;
+            document.getElementById('linkOutput').classList.remove('hidden');
+        }
+
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            const btn = document.getElementById('copyBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = originalText; }, 2000);
+        }
+
+        function initGame() {
+            createGrid(); attachKeyboardListeners();
+            document.addEventListener('keydown', handlePhysicalKeyboard);
+            updateHint();
+        }
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            for (let i = 0; i < 5; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let j = 0; j < 4; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile'; tile.id = `tile-${i}-${j}`;
+                    row.appendChild(tile);
+                }
+                grid.appendChild(row);
+            }
+        }
+
+        function attachKeyboardListeners() {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                key.addEventListener('click', () => { handleKey(key.dataset.key); });
+            });
+        }
+
+        function handlePhysicalKeyboard(e) {
+            if (gameState.gameOver) return;
+            if (e.key === 'Enter') handleKey('ENTER');
+            else if (e.key === 'Backspace') handleKey('BACKSPACE');
+            else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+        }
+
+        function handleKey(key) {
+            if (gameState.gameOver) return;
+            if (key === 'ENTER') submitGuess();
+            else if (key === 'BACKSPACE') {
+                if (gameState.currentGuess.length > 0) {
+                    gameState.currentGuess = gameState.currentGuess.slice(0, -1);
+                    updateCurrentRow();
+                }
+            } else if (gameState.currentGuess.length < 4) {
+                gameState.currentGuess += key;
+                updateCurrentRow();
+            }
+        }
+
+        function updateCurrentRow() {
+            for (let i = 0; i < 4; i++) {
+                const tile = document.getElementById(`tile-${gameState.currentRow}-${i}`);
+                if (i < gameState.currentGuess.length) {
+                    tile.textContent = gameState.currentGuess[i];
+                    tile.classList.add('filled');
+                } else {
+                    tile.textContent = ''; tile.classList.remove('filled');
+                }
+            }
+        }
+
+        function submitGuess() {
+            if (gameState.currentGuess.length !== 4) return;
+            const guess = gameState.currentGuess;
+            gameState.guesses.push(guess);
+            const result = evaluateGuess(guess);
+            colorTiles(result);
+            updateKeyboard(guess, result);
+
+            if (guess === gameState.targetWord) {
+                gameState.gameOver = true;
+                setTimeout(() => { revealMessage(true); }, 1500);
+            } else if (gameState.currentRow === 4) {
+                gameState.gameOver = true;
+                setTimeout(() => { revealMessage(false); }, 1500);
+            } else {
+                gameState.currentRow++; gameState.currentGuess = '';
+            }
+        }
+
+        function evaluateGuess(guess) {
+            const result = [];
+            const targetLetters = gameState.targetWord.split('');
+            const guessLetters = guess.split('');
+            const used = new Array(4).fill(false);
+
+            for (let i = 0; i < 4; i++) {
+                if (guessLetters[i] === targetLetters[i]) {
+                    result[i] = 'correct'; used[i] = true;
+                }
+            }
+            for (let i = 0; i < 4; i++) {
+                if (result[i]) continue;
+                const foundIndex = targetLetters.findIndex((letter, idx) => 
+                    letter === guessLetters[i] && !used[idx]
+                );
+                if (foundIndex !== -1) {
+                    result[i] = 'present'; used[foundIndex] = true;
+                } else { result[i] = 'absent'; }
+            }
+            return result;
+        }
+
+        function colorTiles(result) {
+            for (let i = 0; i < 4; i++) {
+                const tile = document.getElementById(`tile-${gameState.currentRow}-${i}`);
+                setTimeout(() => { tile.classList.add(result[i]); }, i * 150);
+            }
+        }
+
+        function updateKeyboard(guess, result) {
+            for (let i = 0; i < 4; i++) {
+                const letter = guess[i]; const status = result[i];
+                if (!gameState.keyboardState[letter] || (status === 'correct') ||
+                    (status === 'present' && gameState.keyboardState[letter] !== 'correct')) {
+                    gameState.keyboardState[letter] = status;
+                }
+            }
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                const letter = key.dataset.key;
+                if (gameState.keyboardState[letter]) {
+                    key.classList.remove('correct', 'present', 'absent');
+                    key.classList.add(gameState.keyboardState[letter]);
+                }
+            });
+        }
+
+        function updateHint() {
+            const attempts = gameState.currentRow + 1;
+            document.getElementById('hintText').textContent = `Attempt ${attempts} of 5`;
+        }
+
+        function revealMessage(won) {
+            document.getElementById('gameBoard').classList.add('hidden');
+            
+            // NEW: Hide these elements when game is over
+            document.getElementById('lockedTitle').classList.add('hidden');
+            document.getElementById('clueContainer').classList.add('hidden');
+
+            document.getElementById('messageReveal').classList.remove('hidden');
+            const celebrationText = won ? `🎉 Unlocked! The word was ${gameState.targetWord}` : `The word was ${gameState.targetWord}. Here's your message anyway 💕`;
+            document.getElementById('celebrationText').textContent = celebrationText;
+            document.getElementById('revealedMessage').textContent = loveMessages[gameState.messageId];
+            document.getElementById('messageFrom').textContent = `— With love, ${gameState.senderName}`;
+        }
+
+        init();
+        startFloatingHearts();
+    </script>
+</body>
+</html>
